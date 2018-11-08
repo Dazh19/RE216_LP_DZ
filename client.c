@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-
 #define MX_SIZE 1024
 
 
