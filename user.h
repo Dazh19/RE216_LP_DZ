@@ -29,8 +29,8 @@ struct Client{
 };
 
 
-struct Liste *client_init(int fd,struct sockaddr_in* serv_addr);
-void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr);
+struct Liste *client_init(int fd,struct sockaddr_in6* serv_addr);
+void insert_client(struct Liste *liste,int fd,struct sockaddr_in6* serv_addr);
 void set_pseudo(struct Liste* liste, char* pseudo,int fd);
 void deleteK(struct Liste * liste,int fd);
 char *retournerUN(struct Liste* liste,int fd);

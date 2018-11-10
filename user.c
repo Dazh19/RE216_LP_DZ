@@ -5,7 +5,7 @@
 //___________________________________________________________________________________________
 
 
-struct Liste *client_init(int fd,struct sockaddr_in* serv_addr){
+struct Liste *client_init(int fd,struct sockaddr_in6* serv_addr){
   struct Liste *liste=malloc(sizeof(*liste));
   struct Client *client=malloc(sizeof(*client));
   if (liste == NULL || client == NULL)
@@ -13,8 +13,8 @@ struct Liste *client_init(int fd,struct sockaddr_in* serv_addr){
      perror("client_init");
      exit(EXIT_FAILURE);
    }
-   client->ip = inet_ntoa(serv_addr->sin_addr);
-   client->port = ntohs(serv_addr->sin_port);
+   client->ip = inet_ntoa(serv_addr->sin6_addr);
+   client->port = ntohs(serv_addr->sin6_port);
    client->client="Unknown";
    client->fd=fd;
    client->next=NULL;
@@ -23,15 +23,15 @@ struct Liste *client_init(int fd,struct sockaddr_in* serv_addr){
 }
 
 
-void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr){
+void insert_client(struct Liste *liste,int fd,struct sockaddr_in6* serv_addr){
   struct Client *new=malloc(sizeof(*new));
 
   if(liste ==NULL || new==NULL){
     perror("insert_client");
     exit(EXIT_FAILURE);
   }
-  new->ip=inet_ntoa(serv_addr->sin_addr);
-  new->port = ntohs(serv_addr->sin_port);
+  new->ip=inet_ntoa(serv_addr->sin6_addr);
+  new->port = ntohs(serv_addr->sin6_port);
   new->client ="Unknown";
   new->next =liste->premier;
   new->fd = fd;

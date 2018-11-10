@@ -10,27 +10,27 @@
 #define MX_SIZE 1024
 
 
-void get_addr_info(char* address, char* port, struct sockaddr_in* serv_addr)
+void get_addr_info(char* address, char* port, struct sockaddr_in6* serv_addr)
 {
   int portno, addressno;
 
   //clean the serv_add structure
-  memset(serv_addr, 0, sizeof(struct sockaddr_in));// Initialisation of memory blocs
+  memset(serv_addr, 0, sizeof(struct sockaddr_in6));// Initialisation of memory blocs
 
   //cast the port from a string to an int
   portno   = atoi(port);
   addressno = atoi(address);
   //internet family protocol
-  serv_addr->sin_family = AF_INET;
+  serv_addr->sin6_family = AF_INET;
 
   //we bind to any ip form the host
   //serv_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
   //we bind on the tcp port specified
-  serv_addr->sin_port = htons(portno);
+  serv_addr->sin6_port = htons(portno);
 
   //inet_aton(addressno, serv_addr->sin_addr); // &serv_addr
-  serv_addr->sin_addr.s_addr = inet_addr(address);
+  serv_addr->sin6_addr.s_addr = inet_addr(address);
 }
 
 int do_socket(int domain, int type, int protocol)
@@ -47,7 +47,7 @@ int do_socket(int domain, int type, int protocol)
   return sock;
 }
 
-void do_connect(int sock, const struct sockaddr_in serv_addr)
+void do_connect(int sock, const struct sockaddr_in6 serv_addr)
 {
   if ( connect(sock, (struct sockaddr *)& serv_addr, sizeof(serv_addr)) == -1)
   {
@@ -108,7 +108,7 @@ int main(int argc,char** argv)
 {
   char msg[MX_SIZE];
   char servermsg[MX_SIZE];
-  struct sockaddr_in sin;
+  struct sockaddr_in6 sin;
   //get address info from the server
   get_addr_info(argv[2], argv[1],  &sin);
 
@@ -119,7 +119,7 @@ int main(int argc,char** argv)
   }
 
   //get the socket
-  int sock = do_socket(AF_INET, SOCK_STREAM, 0);
+  int sock = do_socket(AF_INET6, SOCK_STREAM, 0);
 
   //connect to remote socket
   do_connect(sock, sin);

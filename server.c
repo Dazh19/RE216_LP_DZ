@@ -3,22 +3,22 @@
 
 //___________________________________________________________________________________________
 //___________________________________________________________________________________________
-void init_serv_addr(char* port, struct sockaddr_in* serv_addr)
+void init_serv_addr(char* port, struct sockaddr_in6* serv_addr)
 {
   int portno;
   //clean the serv_add structure
-  memset(serv_addr, 0, sizeof(struct sockaddr_in));
+  memset(serv_addr, 0, sizeof(struct sockaddr_in6));
   //cast the port from a string to an int
   portno   = atoi(port);
 
   //internet family protocol
-  serv_addr->sin_family = AF_INET;
+  serv_addr->sin6_family = AF_INET6;
 
   //we bind to any ip form the host
-  serv_addr->sin_addr.s_addr = INADDR_ANY;
+  serv_addr->sin6_addr.s_addr = IN6ADDR_ANY;
 
   //we bind on the tcp port specified
-  serv_addr->sin_port = htons(portno);
+  serv_addr->sin6_port = htons(portno);
 }
 
 
@@ -37,7 +37,7 @@ int do_socket(int domain, int type, int protocol)
 }
 
 
-int do_bind(int sock, const struct sockaddr_in* serv_addr)
+int do_bind(int sock, const struct sockaddr_in6* serv_addr)
 {
 
   if (bind(sock, (struct sockaddr *) serv_addr, sizeof(*serv_addr)) == -1)
@@ -60,7 +60,7 @@ int do_listen(int sock, int nb)
 }
 
 
-int do_accept(int sock, struct sockaddr_in* serv_addr)
+int do_accept(int sock, struct sockaddr_in6* serv_addr)
 {
   int addrlen = sizeof(struct sockaddr_in); // this settle the "bad address" problem
   int sock_client = accept(sock, (struct sockaddr *)serv_addr, &addrlen);
@@ -158,12 +158,12 @@ int main(int argc, char** argv)
   int a = 0;
   int b = 0;
 
-  int sock=do_socket(AF_INET, SOCK_STREAM, 0);
+  int sock=do_socket(AF_INET6, SOCK_STREAM, 0);
 
-  struct sockaddr_in sin;
+  struct sockaddr_in6 sin;
   init_serv_addr(argv[1], &sin);
 
-  struct sockaddr_in addr_client;
+  struct sockaddr_in6 addr_client;
 
   struct pollfd fds[NB];
   memset (fds, 0, sizeof(fds));
