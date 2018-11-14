@@ -13,12 +13,16 @@ struct Liste *client_init(int fd,struct sockaddr_in* serv_addr){
      perror("client_init");
      exit(EXIT_FAILURE);
    }
+   liste->premier=client;
+
    client->ip = inet_ntoa(serv_addr->sin_addr);
    client->port = ntohs(serv_addr->sin_port);
    client->client="Unknown";
    client->fd=fd;
+   client->channel_name="NOCHANNEL";
    client->next=NULL;
-   liste->premier=client;
+   client->inChannel = 0;
+
   return liste;
 }
 
@@ -35,6 +39,8 @@ void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr){
   new->client ="Unknown";
   new->next =liste->premier;
   new->fd = fd;
+  new->channel_name="NOCHANNEL";
+  new->inChannel = 0;
 
   liste->premier=new;
   printf("sucess insertion ");
@@ -56,36 +62,7 @@ void set_pseudo(struct Liste* liste, char* pseudo,int fd){
   }
 }
 
-
-void deleteK(struct Liste * liste,int fd){
-
-  if(liste==NULL){
-    perror("delete");
-    exit(EXIT_FAILURE);
-  }
-  if(liste->premier != NULL){
-    struct Client *prev=liste->premier;
-
-    if(prev->fd == fd){ // if the head of the list is fd
-      liste->premier = prev->next;
-      free(prev);
-    }else{
-      while( (prev != NULL) && (prev->next->fd != fd) ){
-        prev=prev->next;
-      }
-      //prev is the previous element of fd
-
-      struct Client *curr=prev->next;//nt has fd =fd;
-      prev->next = curr->next;
-
-      free(curr);
-    }
-  }
-
-}
-
-
-char *retournerUN(struct Liste* liste,int fd){
+char *getPseudo(struct Liste* liste,int fd){
   if (liste == NULL){
       perror("print list");
       exit(EXIT_FAILURE);
@@ -97,6 +74,7 @@ char *retournerUN(struct Liste* liste,int fd){
   }
   return actuel->client;
 }
+
 
 
 int getfd(struct Liste* liste, char* pseudo){
@@ -144,4 +122,87 @@ int getport(struct Liste *liste,int fd){
     actuel=actuel->next;
   }
   return actuel->port;//ntohs
+}
+
+void deleteK(struct Liste * liste,int fd){
+
+  if(liste==NULL){
+    perror("delete");
+    exit(EXIT_FAILURE);
+  }
+  if(liste->premier != NULL){
+    struct Client *prev=liste->premier;
+
+    if(prev->fd == fd){ // if the head of the list is fd
+      liste->premier = prev->next;
+      free(prev);
+    }else{
+      while( (prev != NULL) && (prev->next->fd != fd) ){
+        prev=prev->next;
+      }
+      //prev is the previous element of fd
+
+      struct Client *curr=prev->next;//nt has fd =fd;
+      prev->next = curr->next;
+
+      free(curr);
+    }
+  }
+
+}
+
+void set_userIsChannel(struct Liste* liste, int fd, int un){
+  if (liste == NULL){
+      perror("set_userIsChannel");
+      exit(EXIT_FAILURE);
+  }
+
+  struct Client *actuel = liste->premier;
+  while(actuel != NULL && actuel->fd != fd){
+    actuel=actuel->next;
+  }
+  if(actuel!=NULL){
+    actuel->inChannel = un;
+  }
+}
+
+void set_userChannel(struct Liste* liste, int fd, char* channel){
+  if (liste == NULL){
+      perror("set_userChannel");
+      exit(EXIT_FAILURE);
+  }
+
+  struct Client *actuel = liste->premier;
+  while(actuel != NULL && actuel->fd != fd){
+    actuel=actuel->next;
+  }
+  if(actuel !=NULL){
+    actuel->channel_name=channel;
+  }
+}
+
+char* get_userchannel(struct Liste* liste, int fd){
+  if (liste == NULL){
+      perror("get_userchannel");
+      exit(EXIT_FAILURE);
+  }
+
+  struct Client *actuel = liste->premier;
+  while(actuel != NULL && actuel->fd != fd){
+    actuel=actuel->next;
+  }
+  return actuel->channel_name;
+}
+
+int get_userisChannel(struct Liste* liste, int fd){
+  if (liste == NULL){
+      perror("get_userisChannel");
+      exit(EXIT_FAILURE);
+  }
+
+  struct Client *actuel = liste->premier;
+  while(actuel != NULL && actuel->fd != fd){
+    actuel=actuel->next;
+  }
+  return actuel->inChannel;
 }

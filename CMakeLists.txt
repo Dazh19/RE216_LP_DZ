@@ -15,7 +15,7 @@ add_executable(RE216_JALON01_CLIENT ${SRC_CLIENT})
 SET(SRC_SERVER
 
 user.c
-
+channel.c
         server.c)
 
 add_executable(RE216_JALON01_SERVER  ${SRC_SERVER})

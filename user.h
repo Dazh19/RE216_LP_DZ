@@ -12,8 +12,7 @@
 
 #define NB 20
 #define MX_SIZE 1024
-#define size 150
-
+#define CENT 100
 
 struct Liste{
   struct Client *premier;
@@ -25,6 +24,8 @@ struct Client{
   int port;
   char* ip;
   int fd;
+  int inChannel;
+  char* channel_name;
   struct Client *next;
 };
 
@@ -33,10 +34,14 @@ struct Liste *client_init(int fd,struct sockaddr_in* serv_addr);
 void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr);
 void set_pseudo(struct Liste* liste, char* pseudo,int fd);
 void deleteK(struct Liste * liste,int fd);
-char *retournerUN(struct Liste* liste,int fd);
+char *getPseudo(struct Liste* liste,int fd);
 int getfd(struct Liste* liste, char* pseudo);
 char* getIP(struct Liste* liste, int fd);
 int getport(struct Liste *liste,int fd);
+void set_userIsChannel(struct Liste* liste, int fd, int un);
+void set_userChannel(struct Liste* liste, int fd, char* channel);
+char* get_userchannel(struct Liste* liste, int fd);
+int get_userisChannel(struct Liste* liste, int fd);
 
 
 #endif /* USER_H_ */

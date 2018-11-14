@@ -1,13 +1,14 @@
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
-#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
 
-
+#define NB 5
 #define MX_SIZE 1024
 
 
@@ -107,6 +108,7 @@ int handle_client_message(int sock, char *msg)
 
 int main(int argc,char** argv)
 {
+
   char msg[MX_SIZE];
   char servermsg[MX_SIZE];
   struct sockaddr_in sin;
@@ -125,25 +127,39 @@ int main(int argc,char** argv)
   //connect to remote socket
   do_connect(sock, sin);
 
+  struct pollfd fds[2];
+  memset (fds, 0, sizeof(fds));
+  fds[0].fd = STDIN_FILENO;
+  fds[0].events = POLLIN;
+  fds[1].fd = sock;
+  fds[1].events = POLLIN;
+
+
   for(;;)
   {
-    memset(msg, 0, MX_SIZE);
-    //get user input
-    //do_gets(msg);
-    do_read_client(STDIN_FILENO,msg);
-
-    //send message to the server
-    if (handle_client_message(sock, msg) == 1){
-      printf("connexion finished\n");
-      fflush(stdout);
-      break;
+    if (poll(fds, NB, -1) == -1)
+    {
+      perror("poll client.c");
+      exit(EXIT_FAILURE);
     }
+    if(fds[0].revents == POLLIN){
+      memset(msg, 0, MX_SIZE);
+      //get user input
+      do_read_client(STDIN_FILENO,msg);
 
-    memset(servermsg,0,MX_SIZE);
-    do_read_client(sock,servermsg);
-    fflush(stdout);
-    fprintf(stdout,"[SERVER]: ");
-    printf("%s\n",servermsg);
+      //send message to the server
+      if (handle_client_message(sock, msg) == 1){
+        printf("connexion finished\n");
+        fflush(stdout);
+        break;
+      }
+    }
+    else if(fds[1].revents == POLLIN){
+      memset(servermsg,0,MX_SIZE);
+      do_read_client(sock,servermsg);
+      fflush(stdout);
+      printf("[SERVER]: %s\n",servermsg);
+    }
 
   }
   close(sock); // Closing client's program socket
