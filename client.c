@@ -30,7 +30,7 @@ void get_addr_info(char* address, char* port, struct sockaddr_in6* serv_addr)
   serv_addr->sin6_port = htons(portno);
 
   //inet_aton(addressno, serv_addr->sin_addr); // &serv_addr
-  serv_addr->sin6_addr.s_addr = inet_addr(address);
+  serv_addr->sin_addr.s_addr = inet_addr(address);
 }
 
 int do_socket(int domain, int type, int protocol)

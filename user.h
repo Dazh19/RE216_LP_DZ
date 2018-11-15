@@ -24,6 +24,7 @@ struct Client{
   char* client;
   int port;
   char* ip;
+  char* t; 
   int fd;
   struct Client *next;
 };

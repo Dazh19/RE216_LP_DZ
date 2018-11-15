@@ -8,6 +8,10 @@
 struct Liste *client_init(int fd,struct sockaddr_in6* serv_addr){
   struct Liste *liste=malloc(sizeof(*liste));
   struct Client *client=malloc(sizeof(*client));
+  time_t timestamp;
+  struct tm * t;
+  timestamp = time(NULL);
+  t = localtime(×tamp);
   if (liste == NULL || client == NULL)
    {
      perror("client_init");
@@ -17,6 +21,8 @@ struct Liste *client_init(int fd,struct sockaddr_in6* serv_addr){
    client->port = ntohs(serv_addr->sin6_port);
    client->client="Unknown";
    client->fd=fd;
+   client->t = t->tm_wday + '/' + t->tm_mon + '/' + 1900 + t->tm_year + '@' + t->tm_hour ':' t->tm_min;
+   printf("%s",client->t);
    client->next=NULL;
    liste->premier=client;
   return liste;

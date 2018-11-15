@@ -299,10 +299,12 @@ int main(int argc, char** argv)
         else { //User is found
           char* IPc = getIP( maListe,fd);
           char* numport= malloc(100*sizeof(char));
+          char* date= malloc(100*sizeof(char));
           memset(numport,0,100*sizeof(char));
           sprintf(numport,"%d",getport(maListe,fd));
 
-
+          buff = strcat(buff, " connecté depuis " );
+          buff = strcat(buff,date);
           buff = strcat(buff,special_boeuf);
           buff = strcat(buff, " connecté sur le port " );
           buff = strcat(buff,numport);
