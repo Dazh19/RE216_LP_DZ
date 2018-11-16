@@ -241,7 +241,6 @@ int main(int argc, char** argv)
   fds[0].events = POLLIN;
   struct Liste *maListe;
   struct myBag *myBag;
-
   myBag=channel_init("NONAME");
 
 
@@ -281,12 +280,13 @@ int main(int argc, char** argv)
           fds[i].fd = do_accept(sock, &addr_client);
           fds[i].events = POLLIN;
 
-          if( b==0){
+
+          if(b ==1){
+            insert_client(maListe,fds[i].fd,&addr_client);
+          }
+          else if( b==0){
             maListe=client_init(fds[i].fd,&addr_client);
             b=1;
-          }
-          else if(b ==1){
-            insert_client(maListe,fds[i].fd,&addr_client);
           }
 
           if(i==NB-1){
@@ -307,43 +307,45 @@ int main(int argc, char** argv)
       }
 
 
-    if (fds[i].revents == POLLIN && fds[i].fd !=0 ) {
-      //serv receiving client msg
-      a=do_read(fds[i].fd, buf);
-      char* currentUser=getPseudo(maListe,fds[i].fd);
-      int is_inchannel = get_userisChannel(maListe,fds[i].fd);
+      if (fds[i].revents == POLLIN && fds[i].fd !=0 ) {
+        //serv receiving client msg
+        a=do_read(fds[i].fd, buf);
+        char* currentUser=getPseudo(maListe,fds[i].fd);
+        int is_inchannel = get_userisChannel(maListe,fds[i].fd);
 
 
+        if( get_userisChannel(maListe,fds[i].fd) == 1){//si celui qui parle est dans un salon
+          if( a!=1 && a!=2 && a!=3  && a!=4 && a!=5 && a!=6 && a!=7 && a!=8 && a!=9){
+            int j=1;
+            char* msgfromUser = msg_is_From(currentUser);
+            char* userChannel = malloc(30*sizeof(char));
+            strcpy(userChannel,get_userchannel(maListe,fds[i].fd));
+            struct channel  *chacha = myBag->premier;
+            while(chacha != NULL && strcmp(chacha->channel_name,userChannel)!=0){
+              chacha = chacha->next;
+            }
+            if(chacha != NULL){
+              for (j=0;j < NB;j++){
+                if(chacha->users_fd[j] > 0){
+                  char* lapin = malloc(CENT*sizeof(char));
+                  char* temporary = malloc(CENT*sizeof(char));
+                  memset(lapin, 0, CENT*sizeof(char));
+                  memset(temporary, 0, CENT*sizeof(char));
+                  strcpy(temporary,"CHANNEL: ");
+                  strcat(temporary,chacha->channel_name);
+                  strcat(temporary,"/// message from: ");
+                  strcat(temporary,msgfromUser);
+                  strcpy(lapin,buf);
+                  strcat(temporary,lapin);
+                  do_write(chacha->users_fd[j],temporary);
 
-      if( get_userisChannel(maListe,fds[i].fd) == 1){//si celui qui parle est dans un salon
-        int j=1;
-        char* msgfromUser = msg_is_From(currentUser);
-        char* userChannel = malloc(30*sizeof(char));
-        strcpy(userChannel,get_userchannel(maListe,fds[i].fd));
-        struct channel  *chacha = myBag->premier;
-        while(chacha != NULL && strcmp(chacha->channel_name,userChannel)!=0){
-          chacha = chacha->next;
-        }
-        if(chacha != NULL){
-          for (j=0;j < NB;j++){
-            if(chacha->users_fd[j] > 0){
-                char* lapin = malloc(CENT*sizeof(char));
-                char* temporary = malloc(CENT*sizeof(char));
-                memset(lapin, 0, CENT*sizeof(char));
-                memset(temporary, 0, CENT*sizeof(char));
-                strcpy(temporary,"CHANNEL: ");
-                strcat(temporary,chacha->channel_name);
-                strcat(temporary,"/// message from: ");
-                strcat(temporary,msgfromUser);
-                strcpy(lapin,buf);
-                strcat(temporary,lapin);
-                do_write(chacha->users_fd[j],temporary);
-
+                }
+              }
             }
           }
         }
 
-      }
+
 
 
 
@@ -352,23 +354,7 @@ int main(int argc, char** argv)
       if ( a == 1)
       //if user deconnects
       {
-        /*if(is_inchannel >0){ //he is also leaving channel
-          char* channelName2 = malloc(30*sizeof(char));
-          memset(channelName2,0,30*sizeof(char));
-          strcpy(channelName2,get_userchannel(maListe,fds[i].fd));
-          //modify channel struct
-          dec_nb_user_channel(myBag,channelName2);
-          set_channel_table(myBag,channelName2,fds[i].fd,-1);
 
-          //modify user struct
-          set_userChannel(maListe,fds[i].fd,"NOCHANNEL");
-          set_userIsChannel(maListe,fds[i].fd,0);
-
-          int empty=get_nb_user_channel(myBag,channelName2);
-          if(empty == 0){
-            delete_channel(myBag,channelName2);
-          }
-        }*/
 
         printf("%s has deconnected\n",currentUser);
         fflush(stdout);
@@ -453,18 +439,26 @@ int main(int argc, char** argv)
         //broadcast /msgall
         int j=1;
         char* msgfromUser = msg_is_From(currentUser);
-        for (j=1;j <NB;j++){
+        for (j=1;j <NB ;j++){
+
           if(fds[j].fd != 0){
+
             if(j != i){
+
               char* lapin = malloc(CENT*sizeof(char));
               char* temporary = malloc(CENT*sizeof(char));
+
               memset(lapin, 0, CENT*sizeof(char));
               memset(temporary, 0, CENT*sizeof(char));
 
               strcpy(temporary,msgfromUser);
-              strcpy(lapin,monBuffer(buf));
+
+              strcpy(lapin,buf);
+
               lapin = lapin +8*sizeof(char);
+
               strcat(temporary,lapin);
+
               do_write(fds[j].fd,temporary);
             }
           }

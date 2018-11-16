@@ -124,6 +124,8 @@ int getport(struct Liste *liste,int fd){
   return actuel->port;//ntohs
 }
 
+
+
 void deleteK(struct Liste * liste,int fd){
 
   if(liste==NULL){
