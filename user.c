@@ -22,7 +22,7 @@ struct Liste *client_init(int fd,struct sockaddr_in* serv_addr){
    client->channel_name="NOCHANNEL";
    client->next=NULL;
    client->inChannel = 0;
-
+   client->time = return_time();
   return liste;
 }
 
@@ -41,6 +41,8 @@ void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr){
   new->fd = fd;
   new->channel_name="NOCHANNEL";
   new->inChannel = 0;
+  new->time = return_time();
+
 
   liste->premier=new;
   printf("sucess insertion ");
@@ -110,6 +112,31 @@ char* getIP(struct Liste* liste, int fd){
   return actuel->ip;
 }
 
+char* getTime(struct Liste* liste, int fd){
+  if (liste == NULL){
+      perror("print list");
+      exit(EXIT_FAILURE);
+  }
+
+  struct Client *actuel = liste->premier;
+  while(actuel != NULL && actuel->fd != fd){
+    actuel=actuel->next;
+  }
+  return actuel->time;
+}
+
+
+char* return_time(){
+  char * timeString = malloc(20*sizeof(char));
+  time_t secs = time(0);
+  char *last = malloc(20*sizeof(char));
+  struct tm *local = localtime(&secs);
+
+  sprintf(timeString, "GMT +1: %02d:%02d %02d/%02d/%02d", local->tm_hour, local->tm_min,local->tm_mday, local->tm_mon +1, local->tm_year +1900);
+  strcpy(last,timeString);
+
+  return last;
+}
 
 int getport(struct Liste *liste,int fd){
   if (liste == NULL){

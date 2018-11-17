@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <time.h>
 #define CENT 100
 
 
@@ -50,14 +51,22 @@ char* myCpy2(char* msg){
   return msg2;
 }
 
+char* return_time(){
+  char * timeString = malloc(20*sizeof(char));
+  time_t secs = time(0);
+  char *last = malloc(20*sizeof(char));
+  struct tm *local = localtime(&secs);
+
+  sprintf(timeString, "GMT +1: %02d:%02d %02d/%02d/%02d", local->tm_hour, local->tm_min,local->tm_mday, local->tm_mon +1, local->tm_year +1900);
+  strcpy(last,timeString);
+
+  return last;
+}
 
 int main(int argc, char** argv){
-  char* mamie=malloc(100*sizeof(char));
-  mamie="/un deuuuux trois quatre";
-  printf("%s %s %lu hehe ",myCpy1(mamie), myCpy2(mamie),strlen(myCpy1(mamie)));
-  char buffer[100]="alola";
-  printf("%s %d  %c",buffer,sizeof(buffer),buffer[92]);
-  //printf("%s hehe ",myCpy2(mamie));
+
+     printf("%s\n",return_time());
+
 
   return 0;
 }

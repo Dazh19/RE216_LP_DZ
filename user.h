@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <time.h>
+
 
 #define NB 20
 #define MX_SIZE 1024
@@ -26,6 +28,7 @@ struct Client{
   int fd;
   int inChannel;
   char* channel_name;
+  char* time;
   struct Client *next;
 };
 
@@ -37,6 +40,8 @@ void deleteK(struct Liste * liste,int fd);
 char *getPseudo(struct Liste* liste,int fd);
 int getfd(struct Liste* liste, char* pseudo);
 char* getIP(struct Liste* liste, int fd);
+char* return_time();
+char* getTime(struct Liste* liste, int fd);
 int getport(struct Liste *liste,int fd);
 void set_userIsChannel(struct Liste* liste, int fd, int un);
 void set_userChannel(struct Liste* liste, int fd, char* channel);

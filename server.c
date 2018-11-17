@@ -347,10 +347,6 @@ int main(int argc, char** argv)
 
 
 
-
-
-
-
       if ( a == 1)
       //if user deconnects
       {
@@ -422,14 +418,16 @@ int main(int argc, char** argv)
           char* numport= malloc(CENT*sizeof(char));
           memset(numport,0,CENT*sizeof(char));
           sprintf(numport,"%d",getport(maListe,fd));
-
+          char *last_time = malloc(20*sizeof(char));
+          last_time=getTime(maListe,fd);
 
           strcat(buff,special_boeuf);
           strcat(buff, " connecté sur le port " );
           strcat(buff,numport);
           strcat(buff, " avec l'adresse IP " );
           strcat(buff,IPc);
-
+          strcat(buff," connecté depuis le ");
+          strcat(buff,last_time);
         do_write(fds[i].fd,buff);
 
         }
@@ -562,7 +560,7 @@ int main(int argc, char** argv)
             char* cachalot = malloc(50*sizeof(char));
             memset(cachalot,0,50*sizeof(char));
             strcpy(cachalot,currentUser);
-            strcat(cachalot," ,WELCOME IN ");
+            strcat(cachalot,", WELCOME IN ");
             strcat(cachalot,channelName1);
             strcat(cachalot, " !!!");
 
