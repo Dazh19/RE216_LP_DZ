@@ -1,6 +1,5 @@
 #include "channel.h"
 
-
 struct myBag* channel_init(char * name){
   struct myBag *bag=malloc(sizeof(*bag));
   struct channel *channel=malloc(sizeof(*channel));
@@ -170,10 +169,30 @@ int get_nbchannel(struct myBag *bag){
 
 void set_premierName(struct myBag* bag,char* name){
   if (bag == NULL){
-    perror("set premier Name failed");
+    perror("set_premierName failed");
     exit(EXIT_FAILURE);
   }
   if( bag-> premier != NULL){
     bag->premier->channel_name=name;
   }
+}
+
+
+char* getChannelList(struct myBag* bag){
+  if(bag == NULL){
+    perror("getChannelList failed");
+    exit(EXIT_FAILURE);
+  }
+
+  char* buffer=malloc(MX_SIZE*sizeof(char));
+  memset(buffer, 0, MX_SIZE);
+  strcpy(buffer,"La liste des salons créés:");
+
+  struct channel *actuel= bag->premier;
+  while(actuel != NULL){
+      strcat(buffer,"\n-");
+      strcat(buffer,actuel->channel_name);
+      actuel=actuel->next;
+  }
+  return buffer;
 }

@@ -1,5 +1,4 @@
 #include "user.h"
-
 // THIS FILE CONTAINS LINKED LISTS
 //___________________________________________________________________________________________
 //___________________________________________________________________________________________
@@ -66,7 +65,7 @@ void set_pseudo(struct Liste* liste, char* pseudo,int fd){
 
 char *getPseudo(struct Liste* liste,int fd){
   if (liste == NULL){
-      perror("print list");
+      perror("getPseudo failed");
       exit(EXIT_FAILURE);
   }
 
@@ -77,7 +76,25 @@ char *getPseudo(struct Liste* liste,int fd){
   return actuel->client;
 }
 
+char* getUserList(struct Liste* maListe){
+  if(maListe == NULL){
+    perror("getUserList failed");
+    exit(EXIT_FAILURE);
+  }
+  char* buffer=malloc(MX_SIZE*sizeof(char));
+  memset(buffer, 0, MX_SIZE);
+  strcpy(buffer,"La liste des utilisateurs connectés sont:");
 
+  struct Client *actuel= maListe->premier;
+  while(actuel != NULL){
+    if(actuel->fd != 0){
+      strcat(buffer,"\n-");
+      strcat(buffer,actuel->client);
+      actuel=actuel->next;
+    }
+  }
+  return buffer;
+}
 
 int getfd(struct Liste* liste, char* pseudo){
   if (liste == NULL){
@@ -128,11 +145,13 @@ char* getTime(struct Liste* liste, int fd){
 
 char* return_time(){
   char * timeString = malloc(20*sizeof(char));
-  time_t secs = time(0);
-  char *last = malloc(20*sizeof(char));
-  struct tm *local = localtime(&secs);
+  time_t secs = time(0);//donne temps en secs
+  struct tm *local = localtime(&secs);//découpe secs comme il faut
+  //et attribue le découpage aux différents paramètres de tm
 
-  sprintf(timeString, "GMT +1: %02d:%02d %02d/%02d/%02d", local->tm_hour, local->tm_min,local->tm_mday, local->tm_mon +1, local->tm_year +1900);
+  sprintf(timeString, "(GMT +1) %02d:%02d %02d/%02d/%02d", local->tm_hour, local->tm_min,local->tm_mday, local->tm_mon +1, local->tm_year +1900);
+
+  char *last = malloc(20*sizeof(char));
   strcpy(last,timeString);
 
   return last;
@@ -140,7 +159,7 @@ char* return_time(){
 
 int getport(struct Liste *liste,int fd){
   if (liste == NULL){
-      perror("print list");
+      perror("getport");
       exit(EXIT_FAILURE);
   }
 
@@ -148,7 +167,19 @@ int getport(struct Liste *liste,int fd){
   while(actuel != NULL && actuel->fd != fd){
     actuel=actuel->next;
   }
+
   return actuel->port;//ntohs
+}
+
+char* portToString(struct Liste* liste,int fd){
+  if (liste == NULL){
+      perror("portToString");
+      exit(EXIT_FAILURE);
+  }
+  char* numport= malloc(10*sizeof(char));
+  memset(numport,0,10*sizeof(char));
+  sprintf(numport,"%d",getport(liste,fd));
+  return numport;
 }
 
 

@@ -86,6 +86,9 @@ int do_read(int sock_client, char* buf)
   char* create   = "/create";
   char* join     = "/join";
   char* leave    = "/leave";
+  char* chanlist = "/chanlist";
+  char* chanmember = "/chanmember";
+
   if ( nb == -1 )
   {
     perror("recv");
@@ -118,6 +121,12 @@ int do_read(int sock_client, char* buf)
   }
   if(strncmp(buf,leave,6)==0){
     return 9;
+  }
+  if(strncmp(buf,chanlist,9)==0){
+    return 10;
+  }
+  if(strncmp(buf,chanmember,10)==0){
+    return 11;
   }
 
   return 0;
@@ -315,28 +324,30 @@ int main(int argc, char** argv)
 
 
         if( get_userisChannel(maListe,fds[i].fd) == 1){//si celui qui parle est dans un salon
-          if( a!=1 && a!=2 && a!=3  && a!=4 && a!=5 && a!=6 && a!=7 && a!=8 && a!=9){
+          if( a!=1 && a!=2 && a!=3  && a!=4 && a!=5 && a!=6 && a!=7 && a!=8 && a!=9 && a!=10 && a!=11){
             int j=1;
             char* msgfromUser = msg_is_From(currentUser);
             char* userChannel = malloc(30*sizeof(char));
             strcpy(userChannel,get_userchannel(maListe,fds[i].fd));
+
             struct channel  *chacha = myBag->premier;
             while(chacha != NULL && strcmp(chacha->channel_name,userChannel)!=0){
               chacha = chacha->next;
             }
             if(chacha != NULL){
+
+              char* temporary = malloc(MX_SIZE*sizeof(char));
+              memset(temporary, 0, MX_SIZE*sizeof(char));
+
+              strcpy(temporary,"CHANNEL: ");
+              strcat(temporary,chacha->channel_name);
+              strcat(temporary,"/// message from: ");
+              strcat(temporary,msgfromUser);
+              strcat(temporary,buf);
+
               for (j=0;j < NB;j++){
                 if(chacha->users_fd[j] > 0){
-                  char* lapin = malloc(CENT*sizeof(char));
-                  char* temporary = malloc(CENT*sizeof(char));
-                  memset(lapin, 0, CENT*sizeof(char));
-                  memset(temporary, 0, CENT*sizeof(char));
-                  strcpy(temporary,"CHANNEL: ");
-                  strcat(temporary,chacha->channel_name);
-                  strcat(temporary,"/// message from: ");
-                  strcat(temporary,msgfromUser);
-                  strcpy(lapin,buf);
-                  strcat(temporary,lapin);
+
                   do_write(chacha->users_fd[j],temporary);
 
                 }
@@ -377,34 +388,17 @@ int main(int argc, char** argv)
 
       else if( a ==3 ){
         //if /who
-        char* special_buf=malloc(MX_SIZE*sizeof(char));
-        memset(special_buf, 0, MX_SIZE);
-        strcpy(special_buf,"La liste des utilisateurs connectés sont:");
-
-        struct Client *actuel= maListe->premier;
-        while(actuel != NULL){
-          if(actuel->fd != 0){
-            strcat(special_buf,"\n-");
-            strcat(special_buf,actuel->client);
-            actuel=actuel->next;
-          }
-
-        }
-        do_write(fds[i].fd,special_buf);
-
+        do_write(fds[i].fd,getUserList(maListe));
       }
 
       else if( a == 4){
         // if /quiest
-        char* special_boeuf=malloc(CENT*sizeof(char));
-        memset(special_boeuf, 0, CENT*sizeof(char));
+        char* special_boeuf=malloc(MX_SIZE*sizeof(char));
+        memset(special_boeuf, 0, MX_SIZE*sizeof(char));
 
-        char* buff =malloc(CENT*sizeof(char));
-        memset(buff, 0, CENT*sizeof(char));
+        strcpy(special_boeuf,monBuffer(buf));
 
-        strcat(special_boeuf,monBuffer(buf)); // copy name
-
-        special_boeuf = special_boeuf + 8*sizeof(char);
+        special_boeuf = special_boeuf + 8*sizeof(char);// copy name
         int fd=getfd(maListe,special_boeuf);
         if(fd == -1){
 
@@ -414,21 +408,17 @@ int main(int argc, char** argv)
           do_write(fds[i].fd,special_boeuf);
         }
         else { //User is found
-          char* IPc = getIP( maListe,fd);
-          char* numport= malloc(CENT*sizeof(char));
-          memset(numport,0,CENT*sizeof(char));
-          sprintf(numport,"%d",getport(maListe,fd));
-          char *last_time = malloc(20*sizeof(char));
-          last_time=getTime(maListe,fd);
+          char* buff =malloc(CENT*sizeof(char));
+          memset(buff, 0, CENT*sizeof(char));
 
           strcat(buff,special_boeuf);
           strcat(buff, " connecté sur le port " );
-          strcat(buff,numport);
+          strcat(buff,portToString(maListe,fd));
           strcat(buff, " avec l'adresse IP " );
-          strcat(buff,IPc);
+          strcat(buff,getIP(maListe,fd));
           strcat(buff," connecté depuis le ");
-          strcat(buff,last_time);
-        do_write(fds[i].fd,buff);
+          strcat(buff,getTime(maListe,fd));
+          do_write(fds[i].fd,buff);
 
         }
       }
@@ -436,27 +426,22 @@ int main(int argc, char** argv)
       else if (a ==5){
         //broadcast /msgall
         int j=1;
-        char* msgfromUser = msg_is_From(currentUser);
+        char* lapin = malloc(MX_SIZE*sizeof(char));
+        char* temporary = malloc(MX_SIZE*sizeof(char));
+        memset(lapin, 0, MX_SIZE*sizeof(char));
+        memset(temporary, 0, MX_SIZE*sizeof(char));
+
+
+        char* msgIsFrom = msg_is_From(currentUser);
+
+        strcpy(temporary,msgIsFrom);
+        strcpy(lapin,buf);
+        lapin = lapin +8*sizeof(char);
+        strcat(temporary,lapin);
+
         for (j=1;j <NB ;j++){
-
           if(fds[j].fd != 0){
-
             if(j != i){
-
-              char* lapin = malloc(CENT*sizeof(char));
-              char* temporary = malloc(CENT*sizeof(char));
-
-              memset(lapin, 0, CENT*sizeof(char));
-              memset(temporary, 0, CENT*sizeof(char));
-
-              strcpy(temporary,msgfromUser);
-
-              strcpy(lapin,buf);
-
-              lapin = lapin +8*sizeof(char);
-
-              strcat(temporary,lapin);
-
               do_write(fds[j].fd,temporary);
             }
           }
@@ -479,11 +464,12 @@ int main(int argc, char** argv)
           free(noexist);
         }
         else{
-          char* temporary1 = malloc(CENT*sizeof(char));
-          memset(temporary1, 0, CENT*sizeof(char));
+          char* temporary1 = malloc(MX_SIZE*sizeof(char));
+          memset(temporary1, 0, MX_SIZE*sizeof(char));
 
-          char* chevre = malloc(CENT*sizeof(char));
-          memset(chevre,0,CENT*sizeof(char));
+          char* chevre = malloc(MX_SIZE*sizeof(char));
+          memset(chevre,0,MX_SIZE*sizeof(char));
+
           chevre = myCpy2(monBuffer(buf));
           temporary1 = msg_is_From(currentUser);
           strcat( temporary1,chevre);
@@ -540,8 +526,8 @@ int main(int argc, char** argv)
           if(val <0){
             //if channel doesnt exist
             // cant join no exist channel
-            char* baleine = malloc(50*sizeof(char));
-            memset(baleine,0,50*sizeof(char));
+            char* baleine = malloc(CENT*sizeof(char));
+            memset(baleine,0,CENT*sizeof(char));
             strcpy(baleine,channelName1);
             strcat(baleine," channel doesnt exist");
             do_write(fds[i].fd,baleine);
@@ -557,8 +543,8 @@ int main(int argc, char** argv)
             inc_nb_user_channel(myBag,channelName1);
             set_channel_table(myBag,channelName1,fds[i].fd,fds[i].fd);
 
-            char* cachalot = malloc(50*sizeof(char));
-            memset(cachalot,0,50*sizeof(char));
+            char* cachalot = malloc(CENT*sizeof(char));
+            memset(cachalot,0,CENT*sizeof(char));
             strcpy(cachalot,currentUser);
             strcat(cachalot,", WELCOME IN ");
             strcat(cachalot,channelName1);
@@ -598,12 +584,55 @@ int main(int argc, char** argv)
 
       }
 
+      else if( a == 10){
+        int channelnumber = get_nbchannel(myBag);
+        if (channelnumber>0){
+          if(channelnumber == 1 && strcmp(myBag->premier->channel_name,"NONAME")==0){
+            do_write(fds[i].fd,"there is no created channel");
+          }
+          else{
+            do_write(fds[i].fd,getChannelList(myBag));
+          }
+        }
+        else{
+            do_write(fds[i].fd,"there is no created channel");
+        }
+      }
+      else if(a == 11){
+        if(get_userisChannel(maListe,fds[i].fd)>0){ //verify user is in channel
+          struct channel *cha1 = malloc(sizeof(*cha1));
+          cha1 = myBag->premier;
+          while(strcmp(cha1->channel_name,get_userchannel(maListe,fds[i].fd))!=0){
+            cha1 = cha1->next;
+          }
+          if(cha1!= NULL){
+            int indice=0;
+            char* usr_in_channel = malloc(CENT*sizeof(char));
+            strcpy(usr_in_channel,"the list of users in your channel ");
+            strcat(usr_in_channel,cha1->channel_name);
+            strcat(usr_in_channel," is:\n");
+            for(indice=0;indice<NB;indice++){
+              if(cha1->users_fd[indice]!= -1 ){
+                strcat(usr_in_channel,"-");
+                strcat(usr_in_channel,getPseudo(maListe,cha1->users_fd[indice]));
+                strcat(usr_in_channel,"\n");
+              }
+            }
+            do_write(fds[i].fd,usr_in_channel);
+          }
+
+        }
+        else{
+          do_write(fds[i].fd,"you aren't in a channel");
+        }
+      }
+
         printf("[%s]: %s\n",currentUser,buf);
         fflush(stdout);
 
 
           //we write back to the client
-        if( a!=1 && a!=2 && a!=3  && a!=4 && a!=5 && a!=6 && a!=7 && a!=8 && a!=9){
+        if( a!=1 && a!=2 && a!=3  && a!=4 && a!=5 && a!=6 && a!=7 && a!=8 && a!=9 && a!=10 && a!=11){
           do_write(fds[i].fd, buf);
         }
 

@@ -1,17 +1,7 @@
 #ifndef CHANNEL_H_
 #define CHANNEL_H_
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-#define NB 20
+#include "constant.h"
 
 struct myBag{
   struct channel *premier;
@@ -50,5 +40,6 @@ int get_nbchannel(struct myBag *bag);
 
 void set_premierName(struct myBag* bag,char* name);
 
+char* getChannelList(struct myBag* bag);
 
 #endif /* CHANNEL_H_ */

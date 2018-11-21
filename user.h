@@ -1,20 +1,8 @@
 #ifndef USER_H_
 #define USER_H_
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-#include <time.h>
 
+#include "constant.h"
 
-#define NB 20
-#define MX_SIZE 1024
-#define CENT 100
 
 struct Liste{
   struct Client *premier;
@@ -36,6 +24,7 @@ struct Client{
 struct Liste *client_init(int fd,struct sockaddr_in* serv_addr);
 void insert_client(struct Liste *liste,int fd,struct sockaddr_in* serv_addr);
 void set_pseudo(struct Liste* liste, char* pseudo,int fd);
+char* getUserList(struct Liste* liste);
 void deleteK(struct Liste * liste,int fd);
 char *getPseudo(struct Liste* liste,int fd);
 int getfd(struct Liste* liste, char* pseudo);
@@ -43,6 +32,7 @@ char* getIP(struct Liste* liste, int fd);
 char* return_time();
 char* getTime(struct Liste* liste, int fd);
 int getport(struct Liste *liste,int fd);
+char* portToString(struct Liste* liste,int fd);
 void set_userIsChannel(struct Liste* liste, int fd, int un);
 void set_userChannel(struct Liste* liste, int fd, char* channel);
 char* get_userchannel(struct Liste* liste, int fd);
