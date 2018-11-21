@@ -1,15 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-
-#define NB 5
-#define MX_SIZE 1024
+#include "constant.h"
+#include "user.h"
 
 
 void get_addr_info(char* address, char* port, struct sockaddr_in* serv_addr)
@@ -157,8 +147,9 @@ int main(int argc,char** argv)
     else if(fds[1].revents == POLLIN){
       memset(servermsg,0,MX_SIZE);
       do_read_client(sock,servermsg);
+      printf("%s [SERVER]: %s\n",get_timeHHDD(),servermsg);
       fflush(stdout);
-      printf("[SERVER]: %s\n",servermsg);
+
     }
 
   }

@@ -4,6 +4,7 @@ project(RE216_JALON01)
 
 #add here source files you need to compile and link to the client app
 SET(SRC_CLIENT
+	user.c
 	client.c
 	)
 

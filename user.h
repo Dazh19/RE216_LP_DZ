@@ -31,6 +31,8 @@ int getfd(struct Liste* liste, char* pseudo);
 char* getIP(struct Liste* liste, int fd);
 char* return_time();
 char* getTime(struct Liste* liste, int fd);
+char* get_timeHHDD();
+
 int getport(struct Liste *liste,int fd);
 char* portToString(struct Liste* liste,int fd);
 void set_userIsChannel(struct Liste* liste, int fd, int un);

@@ -151,10 +151,15 @@ char* return_time(){
 
   sprintf(timeString, "(GMT +1) %02d:%02d %02d/%02d/%02d", local->tm_hour, local->tm_min,local->tm_mday, local->tm_mon +1, local->tm_year +1900);
 
-  char *last = malloc(20*sizeof(char));
-  strcpy(last,timeString);
+  return timeString;
+}
 
-  return last;
+char* get_timeHHDD(){
+  char * timeString = malloc(20*sizeof(char));
+  time_t secs = time(0);
+  struct tm *local = localtime(&secs);
+  sprintf(timeString, "(GMT +1) [%02d:%02d]:", local->tm_hour, local->tm_min);
+  return timeString;
 }
 
 int getport(struct Liste *liste,int fd){

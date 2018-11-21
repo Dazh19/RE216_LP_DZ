@@ -1,6 +1,5 @@
 #include "user.h"
 #include "channel.h"
-
 //___________________________________________________________________________________________
 //___________________________________________________________________________________________
 void init_serv_addr(char* port, struct sockaddr_in* serv_addr)
@@ -627,7 +626,7 @@ int main(int argc, char** argv)
         }
       }
 
-        printf("[%s]: %s\n",currentUser,buf);
+        printf("%s [%s] a dit: %s\n",get_timeHHDD(),currentUser,buf);
         fflush(stdout);
 
 
