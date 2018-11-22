@@ -7,21 +7,16 @@ void get_addr_info(char* address, char* port, struct sockaddr_in* serv_addr)
   int portno, addressno;
 
   //clean the serv_add structure
-  memset(serv_addr, 0, sizeof(struct sockaddr_in));// Initialisation of memory blocs
+  memset(serv_addr, 0, sizeof(*serv_addr));// Initialisation of memory blocs
 
   //cast the port from a string to an int
   portno   = atoi(port);
-  addressno = atoi(address);
   //internet family protocol
   serv_addr->sin_family = AF_INET;
 
-  //we bind to any ip form the host
-  //serv_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //we bind on the tcp port specified
   serv_addr->sin_port = htons(portno);
 
-  //inet_aton(addressno, serv_addr->sin_addr); // &serv_addr
   serv_addr->sin_addr.s_addr = inet_addr(address);
 }
 

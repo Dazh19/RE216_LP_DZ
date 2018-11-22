@@ -5,19 +5,16 @@
 void init_serv_addr(char* port, struct sockaddr_in* serv_addr)
 {
   int portno;
-  //clean the serv_add structure
-  memset(serv_addr, 0, sizeof(struct sockaddr_in));
+  memset(serv_addr, 0, sizeof(*serv_addr));
   //cast the port from a string to an int
   portno   = atoi(port);
 
-  //internet family protocol
   serv_addr->sin_family = AF_INET;
 
-  //we bind to any ip form the host
-  serv_addr->sin_addr.s_addr = INADDR_ANY;
+  serv_addr->sin_addr.s_addr = inet_addr(INADDR_ANY);
 
-  //we bind on the tcp port specified
   serv_addr->sin_port = htons(portno);
+
 }
 
 
@@ -35,10 +32,10 @@ int do_socket(int domain, int type, int protocol)
 }
 
 
-int do_bind(int sock, const struct sockaddr_in* serv_addr)
+int do_bind(int sock, const struct sockaddr_in serv_addr)
 {
 
-  if (bind(sock, (struct sockaddr *) serv_addr, sizeof(*serv_addr)) == -1)
+  if (bind(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1)
   {
     perror("bind");
     exit(EXIT_FAILURE);
@@ -60,8 +57,8 @@ int do_listen(int sock, int nb)
 
 int do_accept(int sock, struct sockaddr_in* serv_addr)
 {
-  int addrlen = sizeof(struct sockaddr_in); // this settle the "bad address" problem
-  int sock_client = accept(sock, (struct sockaddr *)serv_addr, &addrlen);
+  int addrlen = sizeof(struct sockaddr_in*);
+  int sock_client = accept(sock, (struct sockaddr *)serv_addr,(socklen_t*) &addrlen);
   if (sock_client == -1)
   {
     perror("accept");
@@ -260,9 +257,9 @@ int main(int argc, char** argv)
     exit(EXIT_FAILURE);
   }// Control sock not already opened
   //we bind on the tcp port specified
-  do_bind(sock, &sin);
-  //specify the socket to be a server socket and listen for at most 20 concurrent client
-  do_listen(sock, 0);
+  do_bind(sock, sin);
+  //specify the socket to be a server socket and listen for at most NB concurrent client
+  do_listen(sock, NB);
   int i;
 
   for (i =1;i<NB;i++){
