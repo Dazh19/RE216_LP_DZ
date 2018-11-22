@@ -12,8 +12,8 @@ struct myBag* channel_init(char * name){
    channel->channel_name = name;
    channel->is_create = 1;
    channel->nb_users = 0;
-
-   for (int i3=0;i3<NB ;i3++){
+   int i3=0;
+   for ( i3=0;i3<NB ;i3++){
      channel->users_fd[i3] = -1;
    }
 
@@ -33,7 +33,8 @@ void insert_channel(struct myBag *bag,char* name){
   new->channel_name = name;
   new->is_create = 1;
   new->nb_users = 0;
-  for (int i=0;i<NB ;i++){
+  int i=0;
+  for ( i=0;i<NB ;i++){
     new->users_fd[i] = -1;
   }
   new->next =bag->premier;
