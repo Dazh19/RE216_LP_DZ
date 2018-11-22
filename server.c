@@ -11,7 +11,7 @@ void init_serv_addr(char* port, struct sockaddr_in* serv_addr)
 
   serv_addr->sin_family = AF_INET;
 
-  serv_addr->sin_addr.s_addr = inet_addr(INADDR_ANY);
+  serv_addr->sin_addr.s_addr = INADDR_ANY;
 
   serv_addr->sin_port = htons(portno);
 
